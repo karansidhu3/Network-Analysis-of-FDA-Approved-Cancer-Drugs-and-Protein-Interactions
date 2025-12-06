@@ -1,0 +1,207 @@
+R version 4.2.1 (2022-06-23) -- "Funny-Looking Kid"
+Copyright (C) 2022 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin17.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[R.app GUI 1.79 (8095) x86_64-apple-darwin17.0]
+
+[Workspace restored from /Users/sanashah/.RData]
+[History restored from /Users/sanashah/.Rapp.history]
+
+> library (igraph)
+
+Attaching package: ‘igraph’
+
+The following objects are masked from ‘package:stats’:
+
+    decompose, spectrum
+
+The following object is masked from ‘package:base’:
+
+    union
+
+> library(readr)
+> 
+> library(igraph)
+> # Checking if dplyr is loaded
+> packageVersion("dplyr")
+[1] ‘1.1.4’
+> 
+> # loading the datasets
+> cancer_all <- read.csv("/Users/sanashah/Documents/cosc421/project/CandidateDrug4Cancer/cancer_all.csv")
+> cancer_2 <- read.csv("/Users/sanashah/Documents/cosc421/project/CandidateDrug4Cancer/cancer_0.2.csv")
+> target_name <- read.csv("/Users/sanashah/Documents/cosc421/project/CandidateDrug4Cancer/target_name.csv")
+> colnames(cancer_all)
+[1] "ChEMBL_ID"     "Target_ID"     "pChEMBL_Value" "smiles"        "protein"       "label"        
+> colnames(target_name)
+[1] "target_id"   "target_name"
+> colnames(cancer_2)
+[1] "index"         "ChEMBL_ID"     "Target_ID"     "pChEMBL_Value" "smiles"        "protein"      
+[7] "label"        
+> 
+> # merging datasets
+> 
+> colnames(cancer_all)[colnames(cancer_all) == "Target_ID"] <- "target_id"
+> drug_targets <- merge(cancer_all, target_name, by = "target_id")
+> drug_targets <- drug_targets[, c("ChEMBL_ID", "target_id", "target_name")]
+> head(drug_targets)
+[1] ChEMBL_ID   target_id   target_name
+<0 rows> (or 0-length row.names)
+> drug_targets <- merge(cancer_all, target_name, by = "target_id")
+> head(drug_targets)
+[1] target_id     ChEMBL_ID     pChEMBL_Value smiles        protein       label         target_name  
+<0 rows> (or 0-length row.names)
+> head(cancer_all$target_id)
+[1] "CHEMBL1824" "CHEMBL203"  "CHEMBL267"  "CHEMBL325"  "CHEMBL267"  "CHEMBL308" 
+> head(target_name$target_id)
+[1] "chembl203" "chembl267" "chembl279" "chembl301" "chembl308" "chembl325"
+> cancer_all$target_id <- tolower(cancer_all$target_id)
+> target_name$target_id <- tolower(target_name$target_id)
+> drug_targets <- merge(cancer_all, target_name, by = "target_id")
+> drug_targets <- drug_targets[, c("ChEMBL_ID", "target_id", "target_name")]
+> head(drug_targets)
+      ChEMBL_ID  target_id                             target_name
+1      CHEMBL10 chembl1824 Receptor protein-tyrosine kinase erbB-2
+2  CHEMBL600048 chembl1824 Receptor protein-tyrosine kinase erbB-2
+3 CHEMBL3968968 chembl1824 Receptor protein-tyrosine kinase erbB-2
+4  CHEMBL234580 chembl1824 Receptor protein-tyrosine kinase erbB-2
+5  CHEMBL461113 chembl1824 Receptor protein-tyrosine kinase erbB-2
+6  CHEMBL285063 chembl1824 Receptor protein-tyrosine kinase erbB-2
+> length(unique(drug_targets$target_name))
+[1] 28
+> length(unique(drug_targets$ChEMBL_ID)) 
+[1] 54869
+> biogrid_file <- "/Users/sanashah/Documents/cosc421/project/BIOGRID-ALL-5.0.250.tab2.txt"
+> biogrid_df <- read.delim(biogrid_file, header = TRUE, stringsAsFactors = FALSE)
+> colnames(biogrid_df)
+ [1] "X.BioGRID.Interaction.ID"     "Entrez.Gene.Interactor.A"     "Entrez.Gene.Interactor.B"    
+ [4] "BioGRID.ID.Interactor.A"      "BioGRID.ID.Interactor.B"      "Systematic.Name.Interactor.A"
+ [7] "Systematic.Name.Interactor.B" "Official.Symbol.Interactor.A" "Official.Symbol.Interactor.B"
+[10] "Synonyms.Interactor.A"        "Synonyms.Interactor.B"        "Experimental.System"         
+[13] "Experimental.System.Type"     "Author"                       "Pubmed.ID"                   
+[16] "Organism.Interactor.A"        "Organism.Interactor.B"        "Throughput"                  
+[19] "Score"                        "Modification"                 "Phenotypes"                  
+[22] "Qualifications"               "Tags"                         "Source.Database"             
+> biogrid_human <- biogrid_df %>%
++   filter(Organism.Interactor.A == 9606 & Organism.Interactor.B == 9606) %>%
++   select(Official.Symbol.Interactor.A, Official.Symbol.Interactor.B) %>%
++   distinct() %>% 
++   filter(Official.Symbol.Interactor.A != Official.Symbol.Interactor.B)
+> colnames(biogrid_human) <- c("from", "to")
+> head(biogrid_human)
+    from    to
+1 MAP2K4  FLNC
+2   MYPN ACTN2
+3  ACVR1  FNTA
+4  GATA2   PML
+5   RPA2 STAT3
+6   ARF1  GGA3
+> drug_edges <- drug_targets %>%
++   select(ChEMBL_ID, target_name) %>%
++   rename(from = ChEMBL_ID, to = target_name)
+> head(drug_edges)
+           from                                      to
+1      CHEMBL10 Receptor protein-tyrosine kinase erbB-2
+2  CHEMBL600048 Receptor protein-tyrosine kinase erbB-2
+3 CHEMBL3968968 Receptor protein-tyrosine kinase erbB-2
+4  CHEMBL234580 Receptor protein-tyrosine kinase erbB-2
+5  CHEMBL461113 Receptor protein-tyrosine kinase erbB-2
+6  CHEMBL285063 Receptor protein-tyrosine kinase erbB-2
+> proteins <- unique(drug_targets$target_name)
+> ppi_edges <- biogrid_human %>%
++   filter(from %in% proteins & to %in% proteins)
+> head(ppi_edges)
+[1] from to  
+<0 rows> (or 0-length row.names)
+> head(target_name$target_name)
+[1] "Epidermal growth factor receptor erbB1"        "Glycogen synthase kinase-3 beta"              
+[3] "Vascular endothelial growth factor receptor 2" "Cyclin-dependent kinase 2"                    
+[5] "Cyclin-dependent kinase 1"                     "Histone deacetylase 1"                        
+> head(drug_targets)
+      ChEMBL_ID  target_id                             target_name
+1      CHEMBL10 chembl1824 Receptor protein-tyrosine kinase erbB-2
+2  CHEMBL600048 chembl1824 Receptor protein-tyrosine kinase erbB-2
+3 CHEMBL3968968 chembl1824 Receptor protein-tyrosine kinase erbB-2
+4  CHEMBL234580 chembl1824 Receptor protein-tyrosine kinase erbB-2
+5  CHEMBL461113 chembl1824 Receptor protein-tyrosine kinase erbB-2
+6  CHEMBL285063 chembl1824 Receptor protein-tyrosine kinase erbB-2
+> head(biogrid_df$Systematic.Name.Interactor.A)
+[1] "-"           "-"           "-"           "-"           "RP4-547C9.3" "-"          
+> length(unique(drug_targets$target_name))
+[1] 28
+> centrality_df <- data.frame(
++   Protein = names(deg_cent),
++   Degree = deg_cent,
++   Betweenness = bet_cent,
++   Type = V(g)$type
++ )
+> 
+> centrality_df <- data.frame(
++   Protein = names(deg_cent),
++   Degree = deg_cent,
++   Betweenness = bet_cent,
++   Type = V(g)$type
++ )
+> length(drug_edges)
+[1] 2
+> 
+> centrality_df <- centrality_df[centrality_df$Type == "protein", ]
+> top_hubs <- centrality_df[order(-centrality_df$Degree), ][1:10, ]
+> print(top_hubs)
+       Protein Degree Betweenness    Type
+KDR        KDR   7482   291816793 protein
+EGFR      EGFR   5933   387327594 protein
+GSK3B    GSK3B   4802   226009100 protein
+JAK2      JAK2   4567   229460721 protein
+PIK3CA  PIK3CA   4145   157918288 protein
+HDAC1    HDAC1   4080   144495793 protein
+CYP3A4  CYP3A4   4054   203839008 protein
+MTOR      MTOR   3611   121954918 protein
+MET        MET   2878   140140360 protein
+AKT1      AKT1   2796   155948776 protein
+> 
+> # Answering RQ4
+> 
+> co_targeted <- drug_targets %>%
++   group_by(gene_symbol) %>%
++   summarise(Num_Drugs = n_distinct(ChEMBL_ID)) %>%
++   filter(Num_Drugs > 1) %>%
++   arrange(desc(Num_Drugs))
+> 
+> print(co_targeted)
+# A tibble: 28 × 2
+   gene_symbol Num_Drugs
+   <chr>           <int>
+ 1 KDR              7482
+ 2 EGFR             5909
+ 3 GSK3B            4773
+ 4 JAK2             4562
+ 5 PIK3CA           4135
+ 6 HDAC1            4074
+ 7 CYP3A4           4054
+ 8 MTOR             3605
+ 9 MET              2871
+10 AKT1             2781
+# ℹ 18 more rows
+# ℹ Use `print(n = ...)` to see more rows
+> V(g)$color <- ifelse(V(g)$name %in% top_hubs$Protein, "red",
++                      ifelse(V(g)$type == "drug", "skyblue", "lightgreen"))
+> plot(g, vertex.size=5, vertex.label=NA, main="Drug-Protein-PPI Network")
+2025-11-09 19:04:34.957 R[8258:4363463] +[CATransaction synchronize] called within transaction
+2025-11-09 19:04:38.456 R[8258:4363463] +[CATransaction synchronize] called within transaction
+2025-11-09 19:36:41.270 R[8258:4363463] +[CATransaction synchronize] called within transaction
+2025-11-09 19:36:43.329 R[8258:4363463] +[CATransaction synchronize] called within transaction
+> 
