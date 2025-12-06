@@ -1,0 +1,30 @@
+target_id,target_name,Protein
+chembl203,Epidermal growth factor receptor erbB1,EGFR
+chembl267,Glycogen synthase kinase-3 beta,GSK3B
+chembl279,Vascular endothelial growth factor receptor 2,KDR
+chembl301,Cyclin-dependent kinase 2,CDK2
+chembl308,Cyclin-dependent kinase 1,CDK1
+chembl325,Histone deacetylase 1,HDAC1
+chembl332,Matrix metalloproteinase-1,MMP1
+chembl333,Matrix metalloproteinase-2,MMP2
+chembl340,Cytochrome P450 3A4,CYP3A4
+chembl1824,Receptor protein-tyrosine kinase erbB-2,ERBB2
+chembl1865,Histone deacetylase 6,HDAC6
+chembl1871,Androgen Receptor,AR
+chembl1913,Platelet-derived growth factor receptor beta,PDGFRB
+chembl1936,Stem cell growth factor receptor,KIT
+chembl1937,Histone deacetylase 2,HDAC2
+chembl1974,Tyrosine-protein kinase receptor FLT3,FLT3
+chembl2041,Tyrosine-protein kinase receptor RET,RET
+chembl2185,Serine/threonine-protein kinase Aurora-B,AURKB
+chembl2842,Serine/threonine-protein kinase mTOR,MTOR
+chembl2971,Tyrosine-protein kinase JAK2,JAK2
+chembl3130,PI3-kinase p110-delta subunit,PIK3CD
+chembl3145,PI3-kinase p110-beta subunit,PIK3CB
+chembl3267,PI3-kinase p110-gamma subunit,PIK3CG
+chembl3717,Hepatocyte growth factor receptor,MET
+chembl4005,PI3-kinase p110-alpha subunit,PIK3CA
+chembl4282,Serine/threonine-protein kinase AKT,AKT1
+chembl4630,Serine/threonine-protein kinase Chk1,CHEK1
+chembl4722,Serine/threonine-protein kinase Aurora-A,AURKA
+chembl262,Glycogen synthase kinase-3 beta,GSK3B
